@@ -1,0 +1,45 @@
+[build-system]
+requires = ["hatchling", "hatch-regex-commit"]
+build-backend = "hatchling.build"
+
+[tool.hatch]
+
+[tool.hatch.metadata]
+allow-direct-references = true
+
+[tool.hatch.version]
+source = "regex_commit"
+commit_extra_args = ["-e"]
+path = "fastapi_utils/__init__.py"
+
+[tool.hatch.build.targets.wheel]
+packages = ["fastapi_utils/"]
+
+[project]
+name = "utils_fastapi"
+dynamic = ['version']
+authors = [
+    { name = "zayycev22" },
+]
+classifiers = [
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Programming Language :: Python :: 3 :: Only",
+    "Framework :: FastAPI",
+    "License :: OSI Approved :: MIT License",
+    "Operating System :: OS Independent",
+]
+
+dependencies = [
+    "fastapi >= 0.110.0",
+    "pydantic >= 2.6.3",
+]
+
+description = "Authentication library for FastAPI for fast migration from Django/DRF. Serializers, signals, permissions, pagination and filters included."
+readme = "README.md"
+requires-python = ">=3.10"
+
+
+[project.urls]
+Source = "https://github.com/zayycev22/fastapi-auth"
