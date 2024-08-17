@@ -6,16 +6,17 @@ from fastapi_utils.filters.base import BaseFilterBackend
 
 class OrderingFilter(BaseFilterBackend):
     order_query_param = "ordering"
-    default_ordering = "id"
 
-    def __init__(self, *ordering_fields):
+    def __init__(self, *ordering_fields, primary_key: str, default_ordering: str = 'id'):
+        self.default_ordering = default_ordering
         self.ordering_fields = ordering_fields
+        self.primary_key = primary_key
 
     async def filter_queryset(self, request: Request, data: Sequence[Any]) -> Sequence[Any]:
         if len(data) == 0:
             return data
         param = request.query_params.get(self.order_query_param)
-        if param is not None and self._prepare_param(param) in self.ordering_fields:
+        if param is not None and self._prepare_param(param) in self.ordering_fields and param != '':
             new_data = self._order_queryset(param.strip(), data)
         else:
             new_data = self._order_queryset(self.default_ordering, data)
@@ -31,8 +32,10 @@ class OrderingFilter(BaseFilterBackend):
     def _order_queryset(self, param: str, data: Sequence[Any]) -> Sequence[Any]:
         self._check_queryset(data, self._prepare_param(param))
         if param.startswith("-"):
-            return sorted(data, key=lambda x: getattr(x, self._prepare_param(param)), reverse=True)
-        return sorted(data, key=lambda x: getattr(x, self._prepare_param(param)))
+            return sorted(data,
+                          key=lambda x: (getattr(x, self._prepare_param(param)), getattr(x, self.primary_key)),
+                          reverse=True)
+        return sorted(data, key=lambda x: (getattr(x, self._prepare_param(param)), getattr(x, self.primary_key)))
 
     @classmethod
     def request_schema(cls) -> Type[BaseModel]:
@@ -45,3 +48,7 @@ class OrderingFilter(BaseFilterBackend):
         for d in data:
             if not hasattr(d, param):
                 raise AttributeError(f"{data[0]} has no attribute {self._prepare_param(param)}")
+            elif not hasattr(d, self.primary_key):
+                raise AttributeError(f"{data[0]} has no attribute {self._prepare_param(self.primary_key)}")
+            else:
+                break

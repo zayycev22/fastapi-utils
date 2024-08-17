@@ -99,3 +99,14 @@ class LimitOffsetPagination(BasePagination):
 
         offset = self.offset - self.limit
         return replace_query_param(url, self.offset_query_param, offset)
+
+
+class DictLimitOffsetPagination(LimitOffsetPagination):
+    async def get_paginated_response(self, instances: list[object]) -> OrderedDict:
+        data = self._paginate_queryset(instances)
+        return OrderedDict([
+            ('count', self.count),
+            ('next', self.get_next_link()),
+            ('previous', self.get_previous_link()),
+            ('results', data)
+        ])
