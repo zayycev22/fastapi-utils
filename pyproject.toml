@@ -36,6 +36,12 @@ dependencies = [
     "pydantic >= 2.6.3",
 ]
 
+
+
+description = "Utils for FastApi. Filters, Pagination, Serializers, Schemas"
+readme = "README.md"
+requires-python = ">=3.10"
+
 [project.optional-dependencies]
 sqlalchemy = [
     "typing-extensions",
@@ -46,11 +52,6 @@ tortoise = [
     "typing-extensions",
     "tortoise-orm",
 ]
-
-description = "Utils for FastApi. Filters, Pagination, Serializers, Schemas"
-readme = "README.md"
-requires-python = ">=3.10"
-
 
 [project.urls]
 Source = "https://github.com/zayycev22/fastapi-utils"
