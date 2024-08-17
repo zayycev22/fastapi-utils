@@ -95,7 +95,7 @@ class PageNumberPagination(BasePagination):
         return replace_query_param(url, self.page_query_param, page_number)
 
 
-class DictPageNumberPagination(PageNumberPagination):
+class RawPageNumberPagination(PageNumberPagination):
     async def get_paginated_response(self, instances: list[object]) -> OrderedDict:
         data = self._paginate_queryset(instances)
         return OrderedDict([
