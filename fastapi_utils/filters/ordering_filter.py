@@ -7,10 +7,15 @@ from fastapi_utils.filters.base import BaseFilterBackend
 class OrderingFilter(BaseFilterBackend):
     order_query_param = "ordering"
 
-    def __init__(self, *ordering_fields, primary_key: str, default_ordering: str = 'id'):
+    def __init__(self, *ordering_fields, primary_key: Optional[str] = None, default_ordering: str = 'id',
+                 primary_key_bool: bool = False):
         self.default_ordering = default_ordering
         self.ordering_fields = ordering_fields
-        self.primary_key = primary_key
+        self.primary_key_bool = primary_key_bool
+        if primary_key_bool:
+            if primary_key is None:
+                raise TypeError("When primary_key_bool is True - primary_key must be set")
+            self.primary_key = primary_key
 
     async def filter_queryset(self, request: Request, data: Sequence[Any]) -> Sequence[Any]:
         if len(data) == 0:
@@ -29,13 +34,21 @@ class OrderingFilter(BaseFilterBackend):
             new_param = new_param[1:]
         return new_param
 
+    def _sort(self, data: Sequence[Any], param: str, reverse: bool = False):
+        if self.primary_key_bool:
+            return sorted(data,
+                          key=lambda x: (getattr(x, self._prepare_param(param)), getattr(x, self.primary_key)),
+                          reverse=reverse)
+        else:
+            return sorted(data,
+                          key=lambda x: getattr(x, self._prepare_param(param)),
+                          reverse=reverse)
+
     def _order_queryset(self, param: str, data: Sequence[Any]) -> Sequence[Any]:
         self._check_queryset(data, self._prepare_param(param))
         if param.startswith("-"):
-            return sorted(data,
-                          key=lambda x: (getattr(x, self._prepare_param(param)), getattr(x, self.primary_key)),
-                          reverse=True)
-        return sorted(data, key=lambda x: (getattr(x, self._prepare_param(param)), getattr(x, self.primary_key)))
+            return self._sort(data, param, reverse=True)
+        return self._sort(data, param)
 
     @classmethod
     def request_schema(cls) -> Type[BaseModel]:
