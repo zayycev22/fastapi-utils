@@ -61,7 +61,9 @@ class OrderingFilter(BaseFilterBackend):
         for d in data:
             if not hasattr(d, param):
                 raise AttributeError(f"{data[0]} has no attribute {self._prepare_param(param)}")
-            elif not hasattr(d, self.primary_key):
-                raise AttributeError(f"{data[0]} has no attribute {self._prepare_param(self.primary_key)}")
+            elif self.primary_key_bool:
+                if not hasattr(d, self.primary_key):
+                    raise AttributeError(f"{data[0]} has no attribute {self._prepare_param(self.primary_key)}")
+                break
             else:
                 break
