@@ -4,7 +4,7 @@ import warnings
 from functools import cached_property
 from math import ceil
 from typing import Optional, Sequence
-from fastapi_auth.utils import method_has_no_args
+from fastapi_utils.utils import method_has_no_args
 
 
 class InvalidPage(Exception):
