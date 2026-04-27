@@ -35,14 +35,18 @@ class OrderingFilter(BaseFilterBackend):
         return new_param
 
     def _sort(self, data: Sequence[Any], param: str, reverse: bool = False):
+        attr = self._prepare_param(param)
+        none_items = [x for x in data if getattr(x, attr) is None]
+        non_none_items = [x for x in data if getattr(x, attr) is not None]
         if self.primary_key_bool:
-            return sorted(data,
-                          key=lambda x: (getattr(x, self._prepare_param(param)), getattr(x, self.primary_key)),
-                          reverse=reverse)
+            sorted_items = sorted(non_none_items,
+                                  key=lambda x: (getattr(x, attr), getattr(x, self.primary_key)),
+                                  reverse=reverse)
         else:
-            return sorted(data,
-                          key=lambda x: getattr(x, self._prepare_param(param)),
-                          reverse=reverse)
+            sorted_items = sorted(non_none_items,
+                                  key=lambda x: getattr(x, attr),
+                                  reverse=reverse)
+        return sorted_items + none_items
 
     def _order_queryset(self, param: str, data: Sequence[Any]) -> Sequence[Any]:
         self._check_queryset(data, self._prepare_param(param))
