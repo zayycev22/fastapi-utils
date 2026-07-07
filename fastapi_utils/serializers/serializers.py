@@ -1,3 +1,4 @@
+import asyncio
 import inspect
 import warnings
 from typing import Union, List, Sequence, Any
@@ -55,11 +56,8 @@ class Serializer(BaseSerializer):
         return data
 
     async def _parse_many_instances(self, instances: List[object]) -> List[dict]:
-        data = []
-        for instance in instances:
-            d = await self._parse_single_instance(instance)
-            data.append(d)
-        return data
+        coroutines = [self._parse_single_instance(instance) for instance in instances]
+        return await asyncio.gather(*coroutines)
 
     async def _check_type(self, annotation: type, method_field: Any) -> tuple[bool, bool]:
         try:
